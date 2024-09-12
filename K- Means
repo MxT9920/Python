@@ -1,0 +1,43 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+# Load the dataset
+data = pd.read_csv("C:/Users/manan/Desktop/Yearly data .csv")
+
+# Standardize the data
+scaler = StandardScaler()
+data_scaled = scaler.fit_transform(data)
+
+# Assuming the optimal number of clusters has been determined (e.g., 3)
+optimal_clusters = 3
+kmeans = KMeans(n_clusters=optimal_clusters, init='k-means++', max_iter=300, n_init=10, random_state=0)
+cluster_labels = kmeans.fit_predict(data_scaled)
+
+# PCA for dimensionality reduction for visualization
+pca = PCA(n_components=2)
+principal_components = pca.fit_transform(data_scaled)
+
+# Creating a DataFrame with PCA results and cluster labels
+pca_df = pd.DataFrame(data=principal_components, columns=['Principal Component 1', 'Principal Component 2'])
+pca_df['Cluster'] = cluster_labels
+
+# Plotting the clusters with improvements
+plt.figure(figsize=(12, 8))  # Bigger figure size
+sns.scatterplot(x='Principal Component 1', y='Principal Component 2', hue='Cluster', data=pca_df, 
+                palette='viridis', s=100)  # Larger marker size with `s`
+
+plt.title('K-Means Clustering with 2D PCA', fontsize=20)  # Descriptive title with larger font
+plt.xlabel('Principal Component 1', fontsize=14)  # X-axis label with larger font
+plt.ylabel('Principal Component 2', fontsize=14)  # Y-axis label with larger font
+plt.legend(title='Cluster', title_fontsize='13', fontsize='12')  # Legend with title and larger font
+plt.grid(True)  # Add gridlines for better readability
+plt.tight_layout()  # Adjust the padding between and around subplots
+
+# Save the plot as a high-quality image
+plt.savefig("C:/Users/manan/Desktop/kmeans_clustering_output.png", dpi=300)  # Save as high-resolution image
+
+plt.show()
