@@ -1,0 +1,29 @@
+import pandas as pd
+from scipy.cluster.hierarchy import dendrogram, linkage
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+
+# Load the dataset
+df = pd.read_csv('C:\\Users\\manan\\Desktop\\DAPM.csv')
+
+# Clean the dataset by removing non-numeric 'Year' values
+df = df[pd.to_numeric(df['Year'], errors='coerce').notnull()]
+
+# Select all indices and metals for clustering
+columns_for_clustering = ['DJI', 'FTSE - 100', 'Nifty 50', 'NYSE', 'Gold', 'Silver']
+X = df[columns_for_clustering].values
+
+# Standardize the features before clustering
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Perform Hierarchical Clustering
+linked = linkage(X_scaled, method='ward')
+
+# Plot the dendrogram
+plt.figure(figsize=(10, 7))
+dendrogram(linked, orientation='top', distance_sort='descending', show_leaf_counts=True)
+plt.title('Hierarchical Clustering Dendrogram')
+plt.xlabel('Index')
+plt.ylabel('Distance')
+plt.show()
