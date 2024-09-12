@@ -1,0 +1,34 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Given allocation amounts out of 1000
+allocations = {'Nifty 50': 400, 'DJI': 300, 'NYSE': 150, 'Gold': 100, 'FTSE - 100': 50,}
+
+# Set color scheme based on the image provided
+colors = ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f', '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac']
+
+# Create the donut chart
+fig, ax = plt.subplots(figsize=(10, 7))
+wedges, texts = ax.pie(allocations.values(), colors=colors, startangle=140,
+                       wedgeprops=dict(width=0.3, edgecolor='black'))
+
+# Draw a circle at the center to turn the pie into a donut chart
+centre_circle = plt.Circle((0, 0), 0.70, color='black', fc='white', linewidth=0)
+ax.add_artist(centre_circle)
+
+# Add labels to the wedges in bold
+for i, p in enumerate(wedges):
+    ang = (p.theta2 - p.theta1) / 2. + p.theta1
+    y = np.sin(np.deg2rad(ang))
+    x = np.cos(np.deg2rad(ang))
+    horizontalalignment = {-1: "right", 1: "left"}[int(np.sign(x))]
+    connectionstyle = "angle,angleA=0,angleB={}".format(ang)
+    kw = dict(arrowprops=dict(arrowstyle="-", connectionstyle=connectionstyle, color='black'), zorder=0, va="center")
+    investment_label = list(allocations.keys())[i]
+    value = allocations[investment_label]
+    ax.annotate(f"{investment_label}\n({value})", xy=(x, y), xytext=(1.5*np.sign(x), 1.2*y),
+                horizontalalignment=horizontalalignment, fontweight='bold', color='black', **kw)
+
+# Set the title and display the donut chart
+plt.title('Investment Portfolio Allocation out of 1000 pounds', fontweight='bold')
+plt.show()
