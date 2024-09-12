@@ -1,0 +1,46 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+
+data_manual = {
+    'Year': ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
+    'DJI': [12965.31, 15009.52, 16777.69, 17587.09, 17927.11, 21750.20, 25053.95, 26379.54, 26890.67, 34055.29, 32897.35],
+    'FTSE-100': [5744.81, 6472.02, 6680.90, 6590.28, 6474.41, 7379.87, 7362.89, 7276.49, 6275.52, 7002.53, 7357.44],
+    'Nifty 50': [5348.78, 5913.36, 7370.96, 8283.39, 8088.16, 9590.72, 10750.67, 11435.85, 11153.00, 16019.11, 17243.47],
+    'NYSE': [8008.24, 9432.34, 10655.29, 10673.23, 10391.71, 11846.12, 12653.07, 12864.52, 12624.35, 16262.10, 15455.16],
+    'Inflation': [2.58, 2.31, 1.45, 0.37, 1.00, 2.57, 2.30, 1.75, 1.00, 2.49, 7.90]
+}
+
+df = pd.DataFrame(data_manual)
+df['Year'] = pd.to_datetime(df['Year'])
+df.set_index('Year', inplace=True)
+
+df_pct_change = df.pct_change().dropna() * 100
+
+plt.figure(figsize=(14, 8))
+ax = plt.subplot(1, 1, 1)
+
+for column in df_pct_change.columns[:-1]: 
+    ax.plot(df_pct_change.index, df_pct_change[column], marker='o', label=column)
+    high = df_pct_change[column].idxmax()
+    low = df_pct_change[column].idxmin()
+    ax.scatter(high, df_pct_change.loc[high, column], color='green', zorder=5)
+    ax.scatter(low, df_pct_change.loc[low, column], color='red', zorder=5)
+    ax.annotate(f'{df_pct_change.loc[high, column]:.2f}%', (high, df_pct_change.loc[high, column]),
+                textcoords="offset points", xytext=(0,10), ha='center')
+    ax.annotate(f'{df_pct_change.loc[low, column]:.2f}%', (low, df_pct_change.loc[low, column]),
+                textcoords="offset points", xytext=(0,-15), ha='center')
+
+ax.plot(df_pct_change.index, df_pct_change['Inflation'], 'k--', label='Inflation')
+
+ax.axhline(0, color='black', linewidth=1.5)
+ax.axvline(df_pct_change.index[0], color='black', linewidth=1.5)
+
+ax.set_xlabel('Year', fontweight='bold')
+ax.set_ylabel('Percentage Change', fontweight='bold')
+ax.set_title('Yearly Percentage Change of Stock Indices and Inflation', fontweight='bold')
+plt.xticks(rotation=45)
+plt.legend()
+plt.tight_layout()
+plt.grid(True)
+plt.show()
