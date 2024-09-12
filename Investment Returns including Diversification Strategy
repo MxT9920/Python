@@ -1,0 +1,30 @@
+import matplotlib.pyplot as plt
+
+# Investment data including Strategy 1 as a separate category
+categories = ['Silver', 'Gold', 'FTSE - 100', 'NYSE', 'Inflation', 'DJI', 'Nifty 50', 'Strategy 1']
+values = [617.04, 1147.96, 1295.01, 1965.51, 2056.40, 2751.17, 3229.63, 2591.58]
+
+# Define the color scheme based on the earlier code
+colors = ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f', '#edc948', 'black', 'teal']
+
+# Create the bar chart
+fig, ax = plt.subplots(figsize=(10, 7))
+
+# Plot the bars for each category
+bars = ax.bar(categories, values, color=colors, edgecolor='black')
+
+# Set the title and labels
+ax.set_title('Investment Returns including Diversification Strategy', fontweight='bold')
+ax.set_ylabel('Total Value', fontweight='bold')
+ax.set_xlabel('Investment Category', fontweight='bold')
+
+# Add value labels to each bar
+for bar in bars:
+    height = bar.get_height()
+    ax.annotate(f'{height:.2f}',
+                xy=(bar.get_x() + bar.get_width() / 2, height),
+                xytext=(0, 3),  # 3 points vertical offset
+                textcoords="offset points",
+                ha='center', va='bottom', fontweight='bold')
+
+plt.show()

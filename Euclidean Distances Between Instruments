@@ -1,0 +1,48 @@
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import pairwise_distances
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Load the data
+data = pd.read_csv(r'C:\Users\manan\Desktop\Yearly data .csv')
+
+# Drop the first column if it's non-numeric (e.g., 'Month' or 'Date')
+data_numeric = data.drop(columns=[data.columns[0]])
+
+# Transpose the data to calculate distances between instruments instead of year-wise
+data_transposed = data_numeric.transpose()
+
+# Standardize the transposed data
+scaler = StandardScaler()
+data_scaled = scaler.fit_transform(data_transposed)
+
+# Calculate the pairwise Euclidean distances
+distance_matrix = pairwise_distances(data_scaled, metric='euclidean')
+
+# Convert the distance matrix to a DataFrame for better readability
+distance_df = pd.DataFrame(distance_matrix, index=data_numeric.columns, columns=data_numeric.columns)
+
+# Generate a vibrant colormap
+cmap = sns.color_palette("viridis", as_cmap=True)
+
+# Set up the matplotlib figure
+f, ax = plt.subplots(figsize=(11, 9))
+
+# Draw the heatmap with the full distance matrix
+sns.heatmap(distance_df, cmap=cmap, annot=True, fmt=".2f", annot_kws={"weight": "bold"},
+            square=True, linewidths=.5, cbar_kws={"shrink": .5})
+
+# Beautify the x labels and y labels
+plt.xticks(rotation=45, ha='right', fontsize=10, weight='bold')
+plt.yticks(fontsize=10, weight='bold')
+
+# Title for the heatmap
+plt.title('Euclidean Distances Between Instruments', fontsize=16, weight='bold')
+
+# Save the figure
+plt.savefig(r'C:\Users\manan\Desktop\instruments_data_heatmap.png', bbox_inches='tight')
+
+# Show the plot
+plt.show()

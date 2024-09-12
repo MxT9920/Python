@@ -1,0 +1,39 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Load the dataset
+data = pd.read_csv('C:\\Users\\manan\\Desktop\\DAPM.csv')
+
+# Calculate the correlation matrix
+correlation_matrix = data.corr()
+
+# Create a mask for the upper triangle
+mask = np.triu(np.ones_like(correlation_matrix, dtype=bool))
+
+# Set up the matplotlib figure
+plt.figure(figsize=(11, 9))
+
+# Generate a custom diverging colormap
+cmap = sns.diverging_palette(240, 10, n=7, as_cmap=True)  # Adjust the hue parameters to match your preferred colors
+
+# Draw the heatmap with the mask and correct aspect ratio
+sns.heatmap(correlation_matrix, mask=mask, cmap=cmap, vmax=1, vmin=-1, center=0,
+            square=True, linewidths=.5, cbar_kws={"shrink": .5}, annot=True, fmt=".2f",
+            annot_kws={"weight": "bold", "size": 10})
+
+# Bold the labels for the axes
+ax = plt.gca()  # Get the current Axes instance on the current figure
+ax.set_xticklabels(ax.get_xticklabels(), fontweight='bold')
+ax.set_yticklabels(ax.get_yticklabels(), fontweight='bold')
+
+# Rotate the labels on the x-axis for better readability
+plt.xticks(rotation=45, horizontalalignment='right', fontweight='bold', fontsize=10)
+plt.yticks(rotation=0, fontweight='bold', fontsize=10)
+
+# Set the title with a bold font
+plt.title('Correlation Heatmap', fontweight='bold', fontsize=12)
+
+# Show the heatmap
+plt.show()
