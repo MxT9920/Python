@@ -3,8 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 
-# Load the data
-file_path = r'C:\Users\manan\Desktop\DAPM.csv'  # Use a raw string for the file path
+file_path = r'C:\Users\manan\Desktop\DAPM.csv'  
 data = pd.read_csv(file_path)
 
 # Prepare the data for forecasting
@@ -15,33 +14,28 @@ forecast_values = {}
 # Perform linear regression and forecast for 2023 and 2024
 for column in variables_to_plot:
     model = LinearRegression()
-    model.fit(years[:-2], data[column][:-2].values.reshape(-1, 1))  # Use data up to 2021 for fitting
+    model.fit(years[:-2], data[column][:-2].values.reshape(-1, 1)) 
     forecast = model.predict(years[-2:].reshape(-1, 1))
     forecast_values[column] = (forecast.flatten()[-2:] - data[column].iloc[-3:-1].values) / data[column].iloc[-3:-1].values * 100
 
-# Calculate the percentage change year over year for each variable
+# Calculate the percentage change year over year
 percentage_change_data = data.set_index('Year').pct_change().reset_index()
 
 # Plotting
 plt.figure(figsize=(14, 8))
 
-# Define a list of distinct colors for better visibility
-colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
-
+colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', 'black', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
 # Plot each variable's historical percentage change
 for idx, column in enumerate(variables_to_plot):
     plt.plot(percentage_change_data['Year'], percentage_change_data[column] * 100, label=column,
              color=colors[idx % len(colors)], marker='o', linewidth=2.5)
-
 # Plot the forecasted percentage changes without connecting to historical data
 for idx, column in enumerate(variables_to_plot):
     if column in data.columns[1:]:
         forecasted_pct_change = list(forecast_values[column])
         plt.plot([2023, 2024], forecasted_pct_change, '--', color=colors[idx % len(colors)], linewidth=2.5)
-
 # Add all years to the x-axis, including forecast years
 plt.xticks(list(data['Year']) + [2023, 2024], rotation=45, fontweight='bold')
-
 # Bold the axis titles and set larger font sizes
 plt.xlabel('Year', fontweight='bold', fontsize=12)
 plt.ylabel('Percentage Change (%)', fontweight='bold', fontsize=12)
@@ -51,7 +45,6 @@ plt.axvline(x=2023, color='black', linestyle='--', linewidth=2)
 plt.axvline(x=2024, color='black', linestyle='-.', linewidth=2)
 
 plt.title('Historical and Forecasted Percentage Change in Key Indicies vs. Inflation', fontweight='bold', fontsize=14)
-
 # Modify the legend to remove start and end of forecast markers
 handles, labels = plt.gca().get_legend_handles_labels()
 # Filter out the lines for the start and end of the forecast
@@ -61,5 +54,5 @@ legend = plt.legend(filtered_handles, filtered_labels, loc='best', fontsize='lar
 legend.get_frame().set_linewidth(1.5)
 
 plt.grid(True)
-plt.tight_layout()  # Adjust layout to prevent clipping of tick labels
+plt.tight_layout()
 plt.show()
