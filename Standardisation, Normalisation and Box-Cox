@@ -1,0 +1,58 @@
+import pandas as pd
+import numpy as np
+from scipy import stats
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+
+# Load the data
+data = pd.read_csv('C:\\Users\\manan\\Desktop\\Yearly data .csv')
+
+# Normalization
+normalizer = MinMaxScaler()
+data_normalized = normalizer.fit_transform(data)
+
+# Standardization
+scaler = StandardScaler()
+data_standardized = scaler.fit_transform(data)
+
+# Box-Cox Transformation
+# The Box-Cox transformation can only be applied to positive data. 
+# If the dataset contains zero or negative values, it needs to be shifted.
+data_shifted = data + (1 - data.min())  # Shift data to be strictly positive
+data_boxcox = np.zeros(data_shifted.shape)
+for i in range(data.shape[1]):  # Apply Box-Cox transformation for each column
+    data_boxcox[:, i], _ = stats.boxcox(data_shifted.iloc[:, i])
+
+# Calculate skewness for all the transformations
+skewness_original = data.skew()
+skewness_normalized = pd.DataFrame(data_normalized, columns=data.columns).skew()
+skewness_standardized = pd.DataFrame(data_standardized, columns=data.columns).skew()
+skewness_boxcox = pd.DataFrame(data_boxcox, columns=data.columns).skew()
+
+# Output skewness
+print("Skewness - Original Data:\n", skewness_original)
+print("Skewness - Normalized Data:\n", skewness_normalized)
+print("Skewness - Standardized Data:\n", skewness_standardized)
+print("Skewness - Box-Cox Transformed Data:\n", skewness_boxcox)
+
+# Create boxplots for original, standardized, and Box-Cox transformed data
+fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(18, 5))
+
+# Original Data Boxplot
+axes[0].boxplot(data)
+axes[0].set_title('Original Data')
+axes[0].set_xticklabels(data.columns, rotation=45, ha='right')
+
+# Standardized Data Boxplot
+axes[1].boxplot(data_standardized)
+axes[1].set_title('Standardized Data')
+axes[1].set_xticklabels(data.columns, rotation=45, ha='right')
+
+# Box-Cox Transformed Data Boxplot
+axes[2].boxplot(data_boxcox)
+axes[2].set_title('Box-Cox Transformed Data')
+axes[2].set_xticklabels(data.columns, rotation=45, ha='right')
+
+# Display the boxplot
+plt.tight_layout()
+plt.show()
