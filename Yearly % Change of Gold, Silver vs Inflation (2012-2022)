@@ -1,0 +1,46 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+data = {
+    'Year': pd.to_datetime(['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022']),
+    'Gold': [1670.55, 1408.72, 1266.27, 1158.79, 1251.65, 1260.26, 1271.26, 1397.71, 1779.31, 1799.03, 1806.07],
+    'Silver': [31.18, 23.77, 19.06, 15.67, 17.17, 17.07, 15.71, 16.23, 20.70, 25.16, 21.76],
+    'Inflation': [2.58, 2.31, 1.45, 0.37, 1.00, 2.57, 2.30, 1.75, 1.00, 2.49, 7.90]
+}
+
+df = pd.DataFrame(data)
+df.set_index('Year', inplace=True)
+
+df_pct_change = df.pct_change().dropna() * 100
+
+fig, ax = plt.subplots(figsize=(10, 6))
+
+ax.plot(df_pct_change.index, df_pct_change['Gold'], label='Gold', marker='o')
+ax.plot(df_pct_change.index, df_pct_change['Silver'], label='Silver', marker='o')
+
+gold_high = df_pct_change['Gold'].idxmax()
+gold_low = df_pct_change['Gold'].idxmin()
+ax.scatter(gold_high, df_pct_change.loc[gold_high, 'Gold'], color='red')
+ax.scatter(gold_low, df_pct_change.loc[gold_low, 'Gold'], color='blue')
+ax.text(gold_high, df_pct_change.loc[gold_high, 'Gold'], f'{gold_high.year}: {df_pct_change.loc[gold_high, "Gold"]:.2f}%')
+ax.text(gold_low, df_pct_change.loc[gold_low, 'Gold'], f'{gold_low.year}: {df_pct_change.loc[gold_low, "Gold"]:.2f}%')
+
+silver_high = df_pct_change['Silver'].idxmax()
+silver_low = df_pct_change['Silver'].idxmin()
+ax.scatter(silver_high, df_pct_change.loc[silver_high, 'Silver'], color='red')
+ax.scatter(silver_low, df_pct_change.loc[silver_low, 'Silver'], color='blue')
+ax.text(silver_high, df_pct_change.loc[silver_high, 'Silver'], f'{silver_high.year}: {df_pct_change.loc[silver_high, "Silver"]:.2f}%')
+ax.text(silver_low, df_pct_change.loc[silver_low, 'Silver'], f'{silver_low.year}: {df_pct_change.loc[silver_low, "Silver"]:.2f}%')
+
+ax.plot(df_pct_change.index, df_pct_change['Inflation'], label='Inflation', linestyle='--', marker='o')
+
+ax.axhline(0, color='black', linewidth=1.5, label='_nolegend_')
+ax.axvline(df_pct_change.index[0], color='black', linewidth=1.5, label='_nolegend_')
+
+ax.set_title('Yearly % Change of Gold, Silver vs Inflation (2012-2022)', fontsize=14, fontweight='bold')
+ax.set_xlabel('Year', fontsize=12, fontweight='bold')
+ax.set_ylabel('% Change', fontsize=12, fontweight='bold')
+
+ax.grid(True)
+ax.legend()
+plt.show()
