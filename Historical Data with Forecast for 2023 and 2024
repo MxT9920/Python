@@ -1,0 +1,64 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+# Load the data
+file_path = r'C:\Users\manan\Desktop\DAPM.csv'  # Use a raw string for the file path
+data = pd.read_csv(file_path)
+
+# Function to perform linear regression and get forecasts
+def get_forecasts(data, years_ahead):
+    years = data['Year'].values.reshape(-1, 1)
+    future_years = np.array([years[-1] + i for i in range(1, years_ahead + 1)]).reshape(-1, 1)
+    forecasts = {}
+    for column in data.columns[1:]:
+        model = LinearRegression().fit(years, data[column])
+        forecast = model.predict(future_years)
+        forecasts[column] = forecast
+    return pd.DataFrame(forecasts, index=future_years.flatten())
+
+# Get the forecasts for the next 2 years
+forecast_df = get_forecasts(data, 2)
+
+# Define colors for the lines
+line_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
+
+# Plotting
+plt.figure(figsize=(14, 8))
+for idx, column in enumerate(data.columns[1:]):
+    color = line_colors[idx % len(line_colors)]
+    # Plot the historical data
+    plt.plot(data['Year'], data[column], label=column, color=color, linewidth=2.5)
+    
+    # Plot the forecasted data
+    plt.plot(forecast_df.index, forecast_df[column], '--', color=color, linewidth=2.5)
+    
+    # Highlighting the high and low points
+    plt.scatter(data['Year'][data[column].idxmax()], data[column].max(), color='red', zorder=5)
+    plt.scatter(data['Year'][data[column].idxmin()], data[column].min(), color='green', zorder=5)
+
+# Highlighting the forecast years with vertical lines
+plt.axvline(x=2023, color='black', linestyle='--', linewidth=1)
+plt.axvline(x=2024, color='black', linestyle='-.', linewidth=1)
+
+# Bold the axis titles and values
+plt.xlabel('Year', fontweight='bold', fontsize=12)
+plt.ylabel('Value', fontweight='bold', fontsize=12)
+
+# Set the x-axis to show every year, including forecast years
+all_years = list(data['Year']) + [2023, 2024]
+plt.xticks(all_years, rotation=45, fontweight='bold')
+
+plt.title('Historical Data with Forecast for 2023 and 2024', fontweight='bold', fontsize=14)
+
+# Modify the legend to remove the forecast markers
+handles, labels = plt.gca().get_legend_handles_labels()
+# Keep only the handles that correspond to the historical data
+handles = [h for h in handles[:len(data.columns)-1]]
+labels = labels[:len(data.columns)-1]
+plt.legend(handles, labels, loc='best', fontsize='large')
+
+plt.grid(True)
+plt.tight_layout()  # Adjust layout to prevent clipping of tick labels
+plt.show()
