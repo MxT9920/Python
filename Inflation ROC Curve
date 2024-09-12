@@ -1,0 +1,71 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix, roc_curve, auc
+from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import label_binarize
+
+# Load the dataset
+df = pd.read_csv('C:\\Users\\manan\\Desktop\\DAPM.csv')
+
+# Assuming 'Inflation' is the variable of interest, classify inflation as 'High' or 'Low' based on the median
+median_inflation = df['Inflation'].median()
+df['Inflation_Class'] = df['Inflation'].apply(lambda x: 1 if x >= median_inflation else 0)
+
+# Binarize the output
+y = label_binarize(df['Inflation_Class'], classes=[0, 1])
+n_classes = y.shape[1]
+
+# Select features for the classification
+X = df.drop(['Year', 'Inflation', 'Inflation_Class'], axis=1)
+
+# Handle missing values with an imputer
+imputer = SimpleImputer(strategy='mean')
+X_imputed = imputer.fit_transform(X)
+
+# Standardize the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X_imputed)
+
+# Split the dataset into a training set and a test set
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3, random_state=42)
+
+# Initialize the Gaussian Naive Bayes classifier
+nb_classifier = GaussianNB()
+
+# Fit the classifier on the training data
+nb_classifier.fit(X_train, y_train)
+
+# Predict probabilities for the test set
+y_pred_prob = nb_classifier.predict_proba(X_test)[:, 1]
+
+# Compute ROC curve and ROC area
+fpr, tpr, _ = roc_curve(y_test, y_pred_prob)
+roc_auc = auc(fpr, tpr)
+
+# Plot ROC curve
+plt.figure(figsize=(8, 6))
+sns.set(style="whitegrid")
+plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver Operating Characteristic')
+plt.legend(loc="lower right")
+plt.show()
+
+# Predict on the test set
+predictions = nb_classifier.predict(X_test)
+
+# Calculate the accuracy and generate a classification report
+accuracy = accuracy_score(y_test, predictions)
+report = classification_report(y_test, predictions)
+
+# Print the classification report and accuracy
+print(report)
+print(f'Accuracy: {accuracy:.2f}')
